@@ -8,7 +8,12 @@ ThisBuild / organizationName := "example"
 lazy val root = (project in file("."))
   .settings(
     name := "slave",
-    libraryDependencies += scalaTest % Test
+    libraryDependencies ++= Seq(
+      scalaTest % Test,
+      "org.apache.logging.log4j" %% "log4j-api-scala" % "11.0",
+      "org.apache.logging.log4j" % "log4j-api" % "2.11.0",
+      "org.apache.logging.log4j" % "log4j-core" % "2.11.0" % Runtime
+    )
   )
 
 // Uncomment the following for publishing to Sonatype.
