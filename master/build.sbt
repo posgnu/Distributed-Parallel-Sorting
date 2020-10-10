@@ -9,12 +9,15 @@ lazy val root = (project in file("."))
   .settings(
     name := "master",
     libraryDependencies ++= Seq(
-      scalaTest % Test,
+      "com.novocode" % "junit-interface" % "0.11" % Test,
       "org.apache.logging.log4j" %% "log4j-api-scala" % "11.0",
       "org.apache.logging.log4j" % "log4j-api" % "2.11.0",
       "org.apache.logging.log4j" % "log4j-core" % "2.11.0" % Runtime
-    )
+    ),
+    testOptions in Test += Tests.Argument(TestFrameworks.JUnit, "-a", "-v", "-s")
   )
+
+
 
 // Uncomment the following for publishing to Sonatype.
 // See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for more detail.

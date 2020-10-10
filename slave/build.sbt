@@ -9,7 +9,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "slave",
     libraryDependencies ++= Seq(
-      scalaTest % Test,
+      "com.novocode" % "junit-interface" % "0.11" % Test,
       "org.apache.logging.log4j" %% "log4j-api-scala" % "11.0",
       "org.apache.logging.log4j" % "log4j-api" % "2.11.0",
       "org.apache.logging.log4j" % "log4j-core" % "2.11.0" % Runtime
