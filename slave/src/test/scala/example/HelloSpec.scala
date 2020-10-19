@@ -6,7 +6,7 @@ import org.junit._
  *
  * To run this test suite, start "sbt" then run the "test" command.
  */
-class FunSetSuite {
+class HelloSuite {
 
   @Test def `contains is implemented`: Unit = {
     assert(Hello.greeting == "hello")
