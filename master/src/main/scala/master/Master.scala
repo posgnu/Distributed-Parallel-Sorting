@@ -1,3 +1,5 @@
+package master
+
 import akka.actor.{ Actor, ActorRef, Props }
 import akka.io.{ IO, Tcp }
 import akka.util.ByteString
@@ -30,4 +32,8 @@ class SimplisticHandler extends Actor {
     case Received(data) => sender() ! Write(data)
     case PeerClosed     => context.stop(self)
   }
+}
+
+object Hello extends App {
+  println("adfafd")
 }
