@@ -9,17 +9,27 @@ object TcpServer extends App
     {
       val server = new ServerSocket(6602)
       println("TCP server initialized: " + server.getInetAddress.getHostAddress + ":" + server.getLocalPort)
-      val client = server.accept
-      println("Slave: " + client.getInetAddress.getHostAddress + ":" + client.getLocalPort)
 
-      val in = new BufferedReader(new InputStreamReader(client.getInputStream)).readLine
-      val out = new PrintStream(client.getOutputStream)
+      val numberOfSlave = 1
+      for (_ <- 1 to numberOfSlave) {
+        val client = server.accept
+        println("Slave: " + client.getInetAddress.getHostAddress + ":" + client.getLocalPort)
 
-      println("Server received:" + in)
-      out.println("Message received")
-      out.flush
+        new Thread() {
+          override def run(): Unit = {
+            val out = new PrintStream(client.getOutputStream, true)
+            // val in = new BufferedReader(new InputStreamReader(client.getInputStream)).readLine
 
-      if (in.equals("Disconnect")) client.close; server.close; println("Server closing:")
+            val content = "success"
+
+            out.println(content)
+            out.flush
+
+            client.close()
+          }
+        }.start()
+      }
+      server.close
     }
 
   catch

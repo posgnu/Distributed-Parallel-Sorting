@@ -11,12 +11,7 @@ object MyClient extends App
   val out = new PrintStream(socket.getOutputStream)
   println("Client initialized:")
 
-
-  out.println("Hello!")
-  out.flush
   println("Client received: " + in.next)
 
-  out.println("Disconnect")
-  out.flush
   socket.close
 }
