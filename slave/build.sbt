@@ -11,7 +11,6 @@ lazy val root = (project in file("."))
     name := "slave",
     libraryDependencies ++= Seq(
       "com.novocode" % "junit-interface" % "0.11" % Test,
-      "com.typesafe.akka" %% "akka-actor" % AkkaVersion,
       "org.apache.logging.log4j" %% "log4j-api-scala" % "11.0",
       "org.apache.logging.log4j" % "log4j-api" % "2.11.0",
       "org.apache.logging.log4j" % "log4j-core" % "2.11.0" % Runtime

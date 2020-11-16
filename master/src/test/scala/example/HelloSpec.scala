@@ -1,4 +1,4 @@
-package example
+package master
 
 import org.junit._
 /**
@@ -6,10 +6,10 @@ import org.junit._
  *
  * To run this test suite, start "sbt" then run the "test" command.
  */
-class HelloSuite {
+class MasterSuite {
 
   @Test def `contains is implemented`: Unit = {
-    assert(Hello.greeting == "hello")
+    assert(Master.greeting == "hello")
   }
 
   /**
@@ -53,51 +53,17 @@ class HelloSuite {
        * The string argument of "assert" is a message that is printed in case
        * the test fails. This helps identifying which assertion failed.
        */
-      assert(Hello.greeting == h)
+      assert(Master.greeting == h)
     }
   }
 
   @Test def `union contains all elements of each set`: Unit = {
     new TestSets {
-      assert(Hello.greeting == h)
+      assert(Master.greeting == h)
     }
   }
 
-  @Test def `intersect test`: Unit = {
-    new TestSets {
-      assert(Hello.greeting == h)
-    }
-  }
 
-  @Test def `diff test`: Unit = {
-    new TestSets {
-      assert(Hello.greeting == h)
-    }
-  }
-
-  @Test def `filter test`: Unit = {
-    new TestSets {
-      assert(Hello.greeting == h)
-    }
-  }
-
-  @Test def `forall test`: Unit = {
-    new TestSets {
-      assert(Hello.greeting == h)
-    }
-  }
-
-  @Test def `exists test`: Unit = {
-    new TestSets {
-      assert(Hello.greeting == h)
-    }
-  }
-
-  @Test def `map test`: Unit = {
-    new TestSets {
-      assert(Hello.greeting == h)
-    }
-  }
 
 
 

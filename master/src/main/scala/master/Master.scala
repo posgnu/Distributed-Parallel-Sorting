@@ -1,39 +1,29 @@
 package master
 
-import akka.actor.{ Actor, ActorRef, Props }
-import akka.io.{ IO, Tcp }
-import akka.util.ByteString
-import java.net.InetSocketAddress
+import java.io._
+import java.net._
 
-class Server extends Actor {
+object TcpServer extends App
+{
+  try
+    {
+      val server = new ServerSocket(6602)
+      println("TCP server initialized: " + server.getInetAddress.getHostAddress + ":" + server.getLocalPort)
+      val client = server.accept
+      println("Slave: " + client.getInetAddress.getHostAddress + ":" + client.getLocalPort)
 
-  import Tcp._
-  import context.system
+      val in = new BufferedReader(new InputStreamReader(client.getInputStream)).readLine
+      val out = new PrintStream(client.getOutputStream)
 
-  IO(Tcp) ! Bind(self, new InetSocketAddress("localhost", 6602))
+      println("Server received:" + in)
+      out.println("Message received")
+      out.flush
 
-  def receive = {
-    case b @ Bound(localAddress) =>
-      context.parent ! b
+      if (in.equals("Disconnect")) client.close; server.close; println("Server closing:")
+    }
 
-    case CommandFailed(_: Bind) => context.stop(self)
-
-    case c @ Connected(remote, local) =>
-      val handler = context.actorOf(Props[SimplisticHandler]())
-      val connection = sender()
-      connection ! Register(handler)
-  }
-
-}
-
-class SimplisticHandler extends Actor {
-  import Tcp._
-  def receive = {
-    case Received(data) => sender() ! Write(data)
-    case PeerClosed     => context.stop(self)
-  }
-}
-
-object Hello extends App {
-  println("adfafd")
+  catch
+    {
+      case e: Exception => println(e.getStackTrace); System.exit(1)
+    }
 }
