@@ -13,9 +13,17 @@ lazy val root = (project in file("."))
       "com.novocode" % "junit-interface" % "0.11" % Test,
       "org.apache.logging.log4j" %% "log4j-api-scala" % "11.0",
       "org.apache.logging.log4j" % "log4j-api" % "2.11.0",
-      "org.apache.logging.log4j" % "log4j-core" % "2.11.0" % Runtime
+      "org.apache.logging.log4j" % "log4j-core" % "2.11.0" % Runtime,
+      "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
+      "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion,
+      "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
     )
   )
+
+PB.targets in Compile := Seq(
+  scalapb.gen() -> (sourceManaged in Compile).value / "scalapb"
+)
+
 
 // Uncomment the following for publishing to Sonatype.
 // See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for more detail.

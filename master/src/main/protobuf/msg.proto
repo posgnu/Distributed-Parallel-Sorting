@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package msg;
+
+service Greeter {
+  rpc StartSampleRpc (Empty) returns (Empty) {}
+
+  rpc PingRpc (Pingreq) returns (Pingres) {}
+
+  rpc MetainfoRpc (Metainfo) returns (Empty) {}
+}
+
+message Pingreq {
+    string ip = 1;
+}
+
+message Pingres {
+    int32 id = 1;
+}
+
+message Empty {
+
+}
+
+message Metainfo  {
+    string min = 1;
+    string max = 2;
+}
