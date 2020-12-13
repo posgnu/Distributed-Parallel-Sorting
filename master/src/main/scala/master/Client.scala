@@ -33,5 +33,4 @@ class RpcClient private(
         logger.info("RPC failed: startsample")
     }
   }
-
 }

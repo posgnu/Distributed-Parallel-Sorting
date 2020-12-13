@@ -26,6 +26,7 @@ PB.targets in Compile := Seq(
   scalapb.gen() -> (sourceManaged in Compile).value / "scalapb"
 )
 
+cancelable in Global := true
 
 
 

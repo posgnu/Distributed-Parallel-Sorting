@@ -1,12 +1,11 @@
 package Slave
 
-import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
-import example.RpcClient
-import org.apache.logging.log4j.scala.Logging
+import client.RpcClient
 import io.grpc.{Server, ServerBuilder}
-import msg.msg.{Empty, GreeterGrpc, Metainfo, Pingreq, Pingres}
+import msg.msg.{Empty, GreeterGrpc, Metainfo, Pingreq}
+import org.apache.logging.log4j.scala.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -100,7 +99,7 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
 
     override def startSampleRpc(req: Empty) = {
       logger.info("Get startSampleMsg")
-      println(new File(".").getCanonicalPath)
+      println(FileManager.readSamples())
       val reply = Empty()
       Future.successful(reply)
     }
