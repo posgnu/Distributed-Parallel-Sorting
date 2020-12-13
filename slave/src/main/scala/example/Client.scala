@@ -1,4 +1,4 @@
-package example
+package Slave
 
 import java.net.InetAddress
 import java.util.concurrent.TimeUnit

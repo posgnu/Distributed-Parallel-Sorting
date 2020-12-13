@@ -23,6 +23,5 @@ message Empty {
 }
 
 message Metainfo  {
-    string min = 1;
-    string max = 2;
+    repeated string samples = 1;
 }
