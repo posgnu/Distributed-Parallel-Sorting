@@ -3,10 +3,10 @@ package client
 import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 
-import Slave.RpcServer
+import Slave.{FileManager, RpcServer}
 import io.grpc.{ManagedChannel, ManagedChannelBuilder, StatusRuntimeException}
 import msg.msg.GreeterGrpc.GreeterBlockingStub
-import msg.msg.{Empty, GreeterGrpc, Pingreq}
+import msg.msg.{Empty, GreeterGrpc, Pingreq, Samplesreq}
 import org.apache.logging.log4j.scala.Logging
 
 object RpcClient extends Logging {
@@ -37,6 +37,17 @@ class RpcClient private(
     catch {
       case e: StatusRuntimeException =>
         logger.info("RPC failed: ping")
+    }
+  }
+
+  def sendSamples() = {
+    try {
+      val samples = FileManager.readSamples()
+      val response = blockingStub.sendSamples(Samplesreq(samples))
+    }
+    catch {
+      case e: StatusRuntimeException =>
+        logger.info("RPC failed: finishSort")
     }
   }
 

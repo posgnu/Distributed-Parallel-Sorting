@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import io.grpc.{ManagedChannel, ManagedChannelBuilder, StatusRuntimeException}
 import msg.msg.GreeterGrpc.{GreeterBlockingStub, GreeterStub}
-import msg.msg.{Empty, GreeterGrpc, MetainfoReq, Samplesres}
+import msg.msg.{Empty, GreeterGrpc, MetainfoReq}
 import org.apache.logging.log4j.scala.Logging
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,10 +29,9 @@ class RpcClient private(
     channel.shutdown.awaitTermination(5, TimeUnit.SECONDS)
   }
 
-  def sendStartSample(): Samplesres = {
+  def sendStartSample() = {
     try {
-      val response : Samplesres =  blockingStub.startSampleRpc(Empty())
-      return response
+      blockingStub.startSampleRpc(Empty())
     }
     catch {
       case e: StatusRuntimeException => {

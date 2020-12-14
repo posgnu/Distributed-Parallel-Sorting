@@ -44,7 +44,7 @@ object FileManager {
   }
 
   def readSamples() = {
-    val source = Source.fromFile(getListOfFiles("./testData/slave1")(0))
+    val source = Source.fromFile(new File("./testData/slave1/input"))
     val lines = source.getLines().take(10)
 
     val result = lines.map(x => x.split(" ")(0)).toList

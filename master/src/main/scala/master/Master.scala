@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import org.apache.logging.log4j.scala.Logging
 import io.grpc.{Server, ServerBuilder}
-import msg.msg.{Empty, GreeterGrpc, Samplesres, Pingreq, Pingres, MetainfoReq}
+import msg.msg.{Empty, GreeterGrpc, Pingreq, Pingres, MetainfoReq, Samplesreq}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -20,11 +20,13 @@ object RpcServer {
   var state: State = Init()
   var numberOfSlave = 0
   private var connectionCount = new AtomicInteger(0)
+  private var metainfoCount = new AtomicInteger(0)
   private var sortedCount = new AtomicInteger(0)
   private var successCount = new AtomicInteger(0)
   private val port = 6602
   var slaveList: List[String] = List[String]()
-  private var slaveRpcClientList = List[RpcClient]()
+  var samplesList: List[String] = List[String]()
+  private var slaveRpcClientList: List[RpcClient] = List[RpcClient]()
 
   def main(args: Array[String]): Unit = {
     if (args.length == 0) {
@@ -77,15 +79,25 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
       if (count == RpcServer.numberOfSlave) {
         assert(RpcServer.state == Init())
         RpcServer.state = Sample()
+        logger.info("Sample stage")
 
-        var samplesList = List[String]()
+        // var samplesList = List[String]()
         for (dest <- RpcServer.slaveRpcClientList) {
-          samplesList = samplesList ::: dest.sendStartSample().samples.toList
+          dest.sendStartSample()
         }
+      }
+      Future.successful(Pingres(slaveId))
+    }
 
+    override def sendSamples(req: Samplesreq) = {
+      val count = RpcServer.metainfoCount.addAndGet(1)
+      RpcServer.samplesList = RpcServer.samplesList ::: req.samples.toList
+
+      if (count == RpcServer.numberOfSlave) {
         RpcServer.state = SortCheck()
+        logger.info("SortCheck stage")
         var pivots = List[String]()
-        val sortedSamples = samplesList.sorted
+        val sortedSamples = RpcServer.samplesList.sorted
         for (i <- 1 until RpcServer.numberOfSlave) {
           pivots = pivots :+ sortedSamples(i*10-1)
         }
@@ -93,8 +105,7 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
           dest.sendMetainfo(pivots)
         }
       }
-
-      Future.successful(Pingres(slaveId))
+      Future.successful(Empty())
     }
 
     override def startSampleRpc(req: Empty) = {
