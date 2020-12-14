@@ -56,7 +56,7 @@ class RpcClient private(
 
   def sendFinshSort() = {
     try {
-      val response = stub.finishSortRpc(Empty())
+      val response = blockingStub.finishSortRpc(Empty())
     }
     catch {
       case e: StatusRuntimeException =>
@@ -76,7 +76,7 @@ class RpcClient private(
 
   def sendFinishSendFile() = {
     try {
-      val response = stub.finishSendFile(Empty())
+      val response = blockingStub.finishSendFile(Empty())
     }
     catch {
       case e: StatusRuntimeException =>
