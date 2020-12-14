@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import io.grpc.{ManagedChannel, ManagedChannelBuilder, StatusRuntimeException}
 import msg.msg.GreeterGrpc.GreeterBlockingStub
-import msg.msg.{Empty, GreeterGrpc}
+import msg.msg.{Empty, GreeterGrpc, Samplesres, MetainfoReq}
 import org.apache.logging.log4j.scala.Logging
 
 object RpcClient extends Logging {
@@ -24,13 +24,28 @@ class RpcClient private(
     channel.shutdown.awaitTermination(5, TimeUnit.SECONDS)
   }
 
-  def sendStartSample(): Unit = {
+  def sendStartSample(): Samplesres = {
     try {
-      val response = blockingStub.startSampleRpc(Empty())
+      val response : Samplesres =  blockingStub.startSampleRpc(Empty())
+      return response
     }
     catch {
-      case e: StatusRuntimeException =>
+      case e: StatusRuntimeException => {
         logger.info("RPC failed: startsample")
+        throw new IllegalStateException()
+      }
+    }
+  }
+
+  def sendMetainfo(pivots: List[String]): Unit = {
+    try {
+      val response =  blockingStub.metainfoRpc(MetainfoReq(RpcServer.slaveList, pivots))
+    }
+    catch {
+      case e: StatusRuntimeException => {
+        logger.info("RPC failed: startsample")
+        throw new IllegalStateException()
+      }
     }
   }
 }

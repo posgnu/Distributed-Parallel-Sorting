@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import client.RpcClient
 import io.grpc.{Server, ServerBuilder}
-import msg.msg.{Empty, GreeterGrpc, Metainfo, Pingreq}
+import msg.msg.{Empty, GreeterGrpc, MetainfoReq, Pingreq, Samplesres}
 import org.apache.logging.log4j.scala.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -99,13 +99,16 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
 
     override def startSampleRpc(req: Empty) = {
       logger.info("Get startSampleMsg")
-      println(FileManager.readSamples())
-      val reply = Empty()
+      val samples = FileManager.readSamples()
+      val reply = Samplesres(samples)
       Future.successful(reply)
     }
 
-    override def metainfoRpc(req: Metainfo) = {
-      throw new NotImplementedError()
+    override def metainfoRpc(req: MetainfoReq) = {
+      logger.info("Get metainfo from master")
+      println(req.slaves)
+      println(req.pivots)
+
       val reply = Empty()
       Future.successful(reply)
     }

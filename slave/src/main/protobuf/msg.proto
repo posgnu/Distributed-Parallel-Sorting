@@ -3,11 +3,11 @@ syntax = "proto3";
 package msg;
 
 service Greeter {
-  rpc StartSampleRpc (Empty) returns (Empty) {}
+  rpc StartSampleRpc (Empty) returns (Samplesres) {}
 
   rpc PingRpc (Pingreq) returns (Pingres) {}
 
-  rpc MetainfoRpc (Metainfo) returns (Empty) {}
+  rpc metainfoRpc (MetainfoReq) returns (Empty) {}
 }
 
 message Pingreq {
@@ -22,8 +22,12 @@ message Empty {
 
 }
 
-message Metainfo  {
+message Samplesres  {
     repeated string samples = 1;
 }
 
+message MetainfoReq {
+    repeated string slaves = 1;
+    repeated string pivots = 2;
+}
 

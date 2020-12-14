@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import org.apache.logging.log4j.scala.Logging
 import io.grpc.{Server, ServerBuilder}
-import msg.msg.{Empty, GreeterGrpc, Metainfo, Pingreq, Pingres}
+import msg.msg.{Empty, GreeterGrpc, Samplesres, Pingreq, Pingres, MetainfoReq}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -24,7 +24,7 @@ object RpcServer {
   private var sortedCount = new AtomicInteger(0)
   private var successCount = new AtomicInteger(0)
   private val port = 6602
-  private var slaveList = List[String]()
+  var slaveList: List[String] = List[String]()
   private var slaveRpcClientList = List[RpcClient]()
 
   def main(args: Array[String]): Unit = {
@@ -79,8 +79,19 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
         assert(RpcServer.state == Init())
         RpcServer.state = Sample()
 
+        var samplesList = List[String]()
         for (dest <- RpcServer.slaveRpcClientList) {
-          dest.sendStartSample()
+          samplesList = samplesList ::: dest.sendStartSample().samples.toList
+        }
+
+        RpcServer.state = SortCheck()
+        var pivots = List[String]()
+        val sortedSamples = samplesList.sorted
+        for (i <- 1 until RpcServer.numberOfSlave) {
+          pivots = pivots :+ sortedSamples(i*10-1)
+        }
+        for (dest <- RpcServer.slaveRpcClientList) {
+          dest.sendMetainfo(pivots)
         }
       }
 
@@ -89,14 +100,10 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
 
     override def startSampleRpc(req: Empty) = {
       throw new NotImplementedError()
-      val reply = Empty()
-      Future.successful(reply)
     }
 
-    override def metainfoRpc(req: Metainfo) = {
+    override def metainfoRpc(req: MetainfoReq) = {
       throw new NotImplementedError()
-      val reply = Empty()
-      Future.successful(reply)
     }
   }
 }
