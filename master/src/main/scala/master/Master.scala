@@ -73,8 +73,10 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
       // For test - Cannot make grpc connection with local address. Sometime slave send its local address not the public one. This makes error.
       var reqIp = ""
       if (req.ip == "192.168.56.1") {
+        // my local machine :)
         reqIp = "141.223.175.215"
       } else {
+        assert(!req.ip.startsWith("192"))
         reqIp = req.ip
       }
 

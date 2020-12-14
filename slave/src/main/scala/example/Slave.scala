@@ -119,6 +119,10 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
       RpcServer.pivots = req.pivots.toList
       logger.info("pivots: " + RpcServer.pivots.toString())
       logger.info("peers: " + RpcServer.slaveList)
+      logger.info("If you are the last slave, then you need to set id manually. your id is " + (RpcServer.slaveList.size - 1).toString)
+      if (RpcServer.slaveId == -1) {
+        RpcServer.slaveId = RpcServer.slaveList.size - 1
+      }
 
       // sorting individually
       FileManager.writeInputFileToOutput()
@@ -136,8 +140,7 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
 
     override def startShuffle(req: Empty) = {
       logger.info("Get startShuffle message!")
-      Thread.sleep(2000)
-      logger.info("Wait enough until last slave get his id!")
+
       FileManager.sendOutputToPeers()
       Future.successful(Empty())
     }
