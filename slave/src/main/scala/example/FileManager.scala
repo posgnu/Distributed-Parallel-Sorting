@@ -10,11 +10,12 @@ import scala.util.Random
 
 object FileManager {
   def writeToFile(data: Seq[String]) = {
-    val filename = RpcServer.outputDir + "/" + randomFileName(Path(""))
+    val filename = RpcServer.outputDir + "/" + randomFileName(Path("")).get.toString()
     val outputFileWriter = new PrintWriter(new File(filename))
     for (line <- data) {
       outputFileWriter.println(line)
     }
+    outputFileWriter.close()
   }
 
   def sortAndWrite(data: Seq[String]) = writeToFile(data.sortWith((f, s) => f.split(" ")(0) > s.split(" ")(0)))
@@ -32,17 +33,23 @@ object FileManager {
     }
 
   def DomergeSort() = {
-    val filenames = getListOfFiles(RpcServer.outputDir).map(_.getName)
+    var filenames = getListOfFiles(RpcServer.outputDir).map(_.getName)
+    println("filename1 " + filenames.toString())
     // sort individual file
     for (name <- filenames) {
-      val source = Source.fromFile(name)
+      val source = Source.fromFile(RpcServer.outputDir + "/" + name)
       source.getLines().grouped(100).foreach(sortAndWrite)
+      source.close()
       new File(name).delete()
     }
 
+    filenames = getListOfFiles(RpcServer.outputDir).map(_.getName)
+    println("filename2 " + filenames.toString())
     var iterList = List[Iterator[String]]()
+    var sourceList = List[Source]()
     for (name <- filenames) {
-      val source = Source.fromFile(name)
+      val source = Source.fromFile(RpcServer.outputDir + "/" + name)
+      sourceList = sourceList :+ source
       iterList = iterList :+ source.getLines()
     }
 
@@ -50,6 +57,11 @@ object FileManager {
     val outputFileWriter = new PrintWriter(new File(filename))
 
     mergeSort(iterList) foreach (i => outputFileWriter.println(i))
+    for (s <- sourceList) {
+      s.close()
+    }
+    outputFileWriter.close()
+    println("1111")
   }
 
 
@@ -77,18 +89,6 @@ object FileManager {
     }
   }
 
-  def readAll() = {
-    val fileList = getListOfFiles(RpcServer.inputDirList(0))
-
-    for (filePath <- fileList) {
-      val source = Source.fromFile(filePath)
-      for (line <- source.getLines()) {
-        val key = line.split(" ")(0)
-        println(key)
-      }
-      source.close()
-    }
-  }
 
   def writeInputFileToOutput() = {
     val fileList = getListOfFiles(RpcServer.inputDirList(0))
