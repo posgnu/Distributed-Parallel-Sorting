@@ -1,6 +1,6 @@
 package Slave
 
-import java.io.File
+import java.io.{File, PrintWriter}
 
 import scala.io.Source
 
@@ -16,6 +16,27 @@ object FileManager {
       }
       source.close()
     }
+  }
+
+  def writeInputFileToOutput(sorted: List[String]) = {
+    val fileList = getListOfFiles("./testData/slave1")
+    val 
+    for (filePath <- fileList) {
+      val source = Source.fromFile(filePath)
+      for (line <- source.getLines()) {
+        val key = line.split(" ")(0)
+
+      }
+      source.close()
+    }
+    // val fileList = getListOfFiles("./testData/slave1/output")
+    // val fileName = (fileList.map(_.getName.toInt).max + 1).toString
+    val writer = new PrintWriter(new File("./testData/slave1/output"+ fileName))
+
+    for (line <- sorted) {
+      writer.write(line)
+    }
+    writer.close()
   }
 
   def readSamples() = {

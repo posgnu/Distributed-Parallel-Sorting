@@ -23,6 +23,8 @@ object RpcServer {
   private var metainfoMessageSent = false
   private var finishSortMessageSent = false
   private var sortedComplete = false
+  private var slaveList = List[String]()
+  private var pivots = List[String]()
   var slaveId: Int = -1
   var inputDirList: List[String] = List[String]()
   var outputDir = ""
@@ -106,9 +108,10 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
 
     override def metainfoRpc(req: MetainfoReq) = {
       logger.info("Get metainfo from master")
-      println(req.slaves)
-      println(req.pivots)
+      RpcServer.slaveList = req.slaves.toList
+      RpcServer.pivots = req.pivots.toList
 
+      // sorting individually
       val reply = Empty()
       Future.successful(reply)
     }
