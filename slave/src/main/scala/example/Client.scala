@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit
 import Slave.{FileManager, RpcServer}
 import io.grpc.{ManagedChannel, ManagedChannelBuilder, StatusRuntimeException}
 import msg.msg.GreeterGrpc.GreeterBlockingStub
-import msg.msg.{Empty, GreeterGrpc, Pingreq, Samplesreq}
+import msg.msg.{Empty, FileChunk, GreeterGrpc, Pingreq, Samplesreq}
 import org.apache.logging.log4j.scala.Logging
 
 object RpcClient extends Logging {
@@ -58,6 +58,26 @@ class RpcClient private(
     catch {
       case e: StatusRuntimeException =>
         logger.info("RPC failed: finishSort")
+    }
+  }
+
+  def sendChunk(lines: Seq[String]) = {
+    try {
+      val response = blockingStub.sendFile(FileChunk(lines, RpcServer.slaveId))
+    }
+    catch {
+      case e: StatusRuntimeException =>
+        logger.info("RPC failed: sendFile")
+    }
+  }
+
+  def sendFinishSendFile() = {
+    try {
+      val response = blockingStub.finishSendFile(Empty())
+    }
+    catch {
+      case e: StatusRuntimeException =>
+        logger.info("RPC failed: FinishSendFile")
     }
   }
 }

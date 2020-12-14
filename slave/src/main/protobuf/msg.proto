@@ -14,6 +14,10 @@ service Greeter {
   rpc FinishSortRpc (Empty) returns (Empty) {}
 
   rpc StartShuffle (Empty) returns (Empty) {}
+
+  rpc SendFile (FileChunk) returns (Empty) {}
+
+  rpc FinishSendFile (Empty) returns (Empty) {}
 }
 
 message Pingreq {
@@ -35,5 +39,10 @@ message Samplesreq  {
 message MetainfoReq {
     repeated string slaves = 1;
     repeated string pivots = 2;
+}
+
+message FileChunk {
+    repeated string chunk = 1;
+    int32 id = 2;
 }
 

@@ -2,9 +2,35 @@ package Slave
 
 import java.io.{File, PrintWriter}
 
+import client.RpcClient
+
 import scala.io.Source
 
 object FileManager {
+  def writeReceivedFile(from: String, lines: List[String]) = {
+    val outputFileWriter = new PrintWriter(new File("./testData/slave1/output/received_from_slaveId" + from))
+
+    for (line <- lines) {
+      outputFileWriter.println(line)
+    }
+
+    outputFileWriter.close()
+  }
+
+  def sendOutputToPeers() = {
+    for (i <- RpcServer.slaveList.indices) {
+      if (i != RpcServer.slaveId) {
+        val rpcClientForPeer = RpcClient(RpcServer.slaveList(i), 6603)
+        val peerSource = Source.fromFile(new File("./testData/slave1/output/" + i.toString))
+        peerSource.getLines().grouped(100).foreach(rpcClientForPeer.sendChunk)
+
+        peerSource.close()
+        new File("./testData/slave1/output/" + i.toString).delete()
+        rpcClientForPeer.sendFinishSendFile()
+      }
+    }
+  }
+
   def readAll() = {
     val fileList = getListOfFiles("./testData/slave1")
 

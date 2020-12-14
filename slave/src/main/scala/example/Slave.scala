@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import client.RpcClient
 import io.grpc.{Server, ServerBuilder}
-import msg.msg.{Empty, GreeterGrpc, MetainfoReq, Pingreq, Samplesreq}
+import msg.msg.{Empty, GreeterGrpc, MetainfoReq, Pingreq, Samplesreq, FileChunk}
 import org.apache.logging.log4j.scala.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -136,6 +136,22 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
 
     override def startShuffle(req: Empty) = {
       logger.info("Get startShuffle message!")
+      FileManager.sendOutputToPeers()
+      Future.successful(Empty())
+    }
+
+    override def sendFile(req: FileChunk) = {
+      FileManager.writeReceivedFile(req.id.toString, req.chunk.toList)
+
+      Future.successful(Empty())
+    }
+
+    override def finishSendFile(req: Empty) = {
+      val count = RpcServer.fileTransferFinishCount.addAndGet(1)
+
+      if (count == RpcServer.slaveList.size - 1) {
+        logger.info("Finish to receive file from peers")
+      }
 
       Future.successful(Empty())
     }

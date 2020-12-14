@@ -70,7 +70,7 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
 
   private class GreeterImpl extends GreeterGrpc.Greeter {
     override def pingRpc(req: Pingreq) = {
-      // For test - Cannot make grpc connection by local ip address. I do not know why
+      // For test - Cannot make grpc connection with local address. Sometime slave send its local address not the public one. This makes error.
       var reqIp = ""
       if (req.ip == "192.168.56.1") {
         reqIp = "141.223.175.215"
