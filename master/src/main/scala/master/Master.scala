@@ -70,8 +70,16 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
 
   private class GreeterImpl extends GreeterGrpc.Greeter {
     override def pingRpc(req: Pingreq) = {
-      RpcServer.slaveList = RpcServer.slaveList :+ req.ip
-      RpcServer.slaveRpcClientList = RpcServer.slaveRpcClientList :+ RpcClient(req.ip, 6603)
+      // For test - Cannot make grpc connection by local ip address. I do not know why
+      var reqIp = ""
+      if (req.ip == "192.168.56.1") {
+        reqIp = "141.223.175.215"
+      } else {
+        reqIp = req.ip
+      }
+
+      RpcServer.slaveList = RpcServer.slaveList :+ reqIp
+      RpcServer.slaveRpcClientList = RpcServer.slaveRpcClientList :+ RpcClient(reqIp, 6603)
       val count = RpcServer.connectionCount.addAndGet(1)
       val slaveId = count - 1
 
@@ -123,6 +131,9 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
         assert(RpcServer.state == SortCheck())
         logger.info("Success individual sorting")
         RpcServer.state = ShuffleCheck()
+        logger.info("ShuffleCheck stage")
+
+
 
       }
       Future.successful(Empty())
