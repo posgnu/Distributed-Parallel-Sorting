@@ -16,3 +16,6 @@ target/
 
 #Intellij
 .idea
+
+#Test data
+testData/
