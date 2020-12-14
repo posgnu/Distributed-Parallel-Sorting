@@ -85,7 +85,7 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
       val count = RpcServer.connectionCount.addAndGet(1)
       val slaveId = count - 1
 
-      logger.info(count + " slaves are connected - " + req.ip)
+      logger.info(count + " slaves are connected - " + reqIp)
       if (count == RpcServer.numberOfSlave) {
         assert(RpcServer.state == Init())
         RpcServer.state = Sample()
@@ -131,7 +131,6 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
 
       if (count == RpcServer.numberOfSlave) {
         assert(RpcServer.state == SortCheck())
-        logger.info("Success individual sorting")
         RpcServer.state = ShuffleCheck()
         logger.info("ShuffleCheck stage")
 

@@ -119,9 +119,10 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
       RpcServer.pivots = req.pivots.toList
       logger.info("pivots: " + RpcServer.pivots.toString())
       logger.info("peers: " + RpcServer.slaveList)
-      logger.info("If you are the last slave, then you need to set id manually. your id is " + (RpcServer.slaveList.size - 1).toString)
+
       if (RpcServer.slaveId == -1) {
         RpcServer.slaveId = RpcServer.slaveList.size - 1
+        logger.info("If you are the last slave, then you need to set id manually. your id is " + (RpcServer.slaveList.size - 1).toString)
       }
 
       // sorting individually
