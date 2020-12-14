@@ -23,13 +23,13 @@ object RpcServer {
   private var metainfoMessageSent = false
   private var finishSortMessageSent = false
   private var sortedComplete = false
-  private var slaveList = List[String]()
-  private var pivots = List[String]()
+  var slaveList: List[String] = List[String]()
+  var pivots: List[String] = List[String]()
   var slaveId: Int = -1
   var inputDirList: List[String] = List[String]()
   var outputDir = ""
 
-  private val client = RpcClient("localhost", 6602)
+  private var client: RpcClient = null
   private val port = 6603
 
   def main(args: Array[String]): Unit = {
@@ -40,10 +40,12 @@ object RpcServer {
       def isSwitch(s : String) = (s(0) == '-')
       list match {
         case Nil => map
+        case "-M" :: value :: tail =>
+          nextOption(map ++ Map('master -> value.toString), tail)
         case "-O" :: value :: tail =>
           nextOption(map ++ Map('out -> value.toString), tail)
         case "-I" :: value :: tail =>
-          nextOption(map ++ Map('in -> value.toString), tail)
+          nextOption(map ++ Map('in -> List(value.toString)), tail)
         case string :: tail => {
             if (isSwitch(string)) {
               println("Unknown option: " + string)
@@ -55,6 +57,7 @@ object RpcServer {
         }
       }
     val options = nextOption(Map(), args.toList)
+    client = RpcClient(options('master).asInstanceOf[String], 6602)
     if (options.nonEmpty) {
       inputDirList = options('in).asInstanceOf[List[String]]
       outputDir = options('out).asInstanceOf[String]
@@ -110,10 +113,20 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
       logger.info("Get metainfo from master")
       RpcServer.slaveList = req.slaves.toList
       RpcServer.pivots = req.pivots.toList
+      logger.info("pivots: " + RpcServer.pivots.toString())
 
       // sorting individually
-      val reply = Empty()
-      Future.successful(reply)
+      FileManager.writeInputFileToOutput()
+      logger.info("Finish individual sort")
+
+      // Send Finish message
+      RpcServer.client.sendFinshSort()
+
+      Future.successful(Empty())
+    }
+
+    override def finishSortRpc(req: Empty) = {
+      throw new NotImplementedError()
     }
   }
 }

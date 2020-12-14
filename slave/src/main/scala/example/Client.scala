@@ -39,4 +39,14 @@ class RpcClient private(
         logger.info("RPC failed: ping")
     }
   }
+
+  def sendFinshSort() = {
+    try {
+      val response = blockingStub.finishSortRpc(Empty())
+    }
+    catch {
+      case e: StatusRuntimeException =>
+        logger.info("RPC failed: finishSort")
+    }
+  }
 }

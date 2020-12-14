@@ -4,8 +4,11 @@ import java.util.concurrent.TimeUnit
 
 import io.grpc.{ManagedChannel, ManagedChannelBuilder, StatusRuntimeException}
 import msg.msg.GreeterGrpc.{GreeterBlockingStub, GreeterStub}
-import msg.msg.{Empty, GreeterGrpc, Samplesres, MetainfoReq}
+import msg.msg.{Empty, GreeterGrpc, MetainfoReq, Samplesres}
 import org.apache.logging.log4j.scala.Logging
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Failure
 
 object RpcClient extends Logging {
   def apply(host: String, port: Int): RpcClient = {
@@ -41,7 +44,7 @@ class RpcClient private(
 
   def sendMetainfo(pivots: List[String]): Unit = {
     try {
-      stub.metainfoRpc(MetainfoReq(RpcServer.slaveList, pivots))
+      blockingStub.metainfoRpc(MetainfoReq(RpcServer.slaveList, pivots))
     }
     catch {
       case e: StatusRuntimeException => {

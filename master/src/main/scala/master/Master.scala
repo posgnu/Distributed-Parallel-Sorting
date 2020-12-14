@@ -20,7 +20,6 @@ object RpcServer {
   var state: State = Init()
   var numberOfSlave = 0
   private var connectionCount = new AtomicInteger(0)
-  private var metainfoCount = new AtomicInteger(0)
   private var sortedCount = new AtomicInteger(0)
   private var successCount = new AtomicInteger(0)
   private val port = 6602
@@ -104,6 +103,18 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
 
     override def metainfoRpc(req: MetainfoReq) = {
       throw new NotImplementedError()
+    }
+
+    override def finishSortRpc(req: Empty) = {
+      val count = RpcServer.sortedCount.addAndGet(1)
+
+      if (count == RpcServer.numberOfSlave) {
+        assert(RpcServer.state == SortCheck())
+        logger.info("Success individual sorting")
+        RpcServer.state = ShuffleCheck()
+
+      }
+      Future.successful(Empty())
     }
   }
 }

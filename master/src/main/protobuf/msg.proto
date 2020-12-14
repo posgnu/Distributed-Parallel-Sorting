@@ -8,6 +8,8 @@ service Greeter {
   rpc PingRpc (Pingreq) returns (Pingres) {}
 
   rpc metainfoRpc (MetainfoReq) returns (Empty) {}
+
+   rpc FinishSortRpc (Empty) returns (Empty) {}
 }
 
 message Pingreq {

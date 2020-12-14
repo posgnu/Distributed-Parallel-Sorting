@@ -18,25 +18,29 @@ object FileManager {
     }
   }
 
-  def writeInputFileToOutput(sorted: List[String]) = {
+  def writeInputFileToOutput() = {
     val fileList = getListOfFiles("./testData/slave1")
-    val 
+    var outputFileWriter = List[PrintWriter]()
+    for (i <- RpcServer.slaveList.indices) {
+      outputFileWriter = outputFileWriter :+ new PrintWriter(new File("./testData/slave1/output/" + i.toString))
+    }
+
     for (filePath <- fileList) {
       val source = Source.fromFile(filePath)
       for (line <- source.getLines()) {
         val key = line.split(" ")(0)
 
+        var location = RpcServer.pivots.takeWhile(_ < key).size
+        outputFileWriter(location).println(line)
       }
       source.close()
     }
     // val fileList = getListOfFiles("./testData/slave1/output")
     // val fileName = (fileList.map(_.getName.toInt).max + 1).toString
-    val writer = new PrintWriter(new File("./testData/slave1/output"+ fileName))
 
-    for (line <- sorted) {
-      writer.write(line)
+    for (writer <- outputFileWriter) {
+      writer.close()
     }
-    writer.close()
   }
 
   def readSamples() = {
