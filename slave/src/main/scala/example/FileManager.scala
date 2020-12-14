@@ -5,10 +5,25 @@ import java.io.{File, PrintWriter}
 import client.RpcClient
 
 import scala.io.Source
+import scala.reflect.io.Path
+import scala.util.Random
 
 object FileManager {
   def writeReceivedFile(from: String, lines: List[String]) = {
-    val outputFileWriter = new PrintWriter(new File(RpcServer.inputDirList(0) + "/output/received_from_slaveId" + from))
+    def randomFileName(dir: Path, prefix: String = "", suffix: String = "", maxTries: Int = 10, nameSize: Int = 5): Option[Path] = {
+      val alphabet = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ ("_")
+
+      //0.- Expensive calculation!
+      def generateName = (1 to nameSize).map(_ => alphabet(Random.nextInt(alphabet.size))).mkString
+
+      //1.- Iterator
+      val paths = for(_ <- (1 to maxTries).iterator) yield dir/(prefix + generateName + suffix)
+
+      //2.- Return the first non existent file (path)
+      paths.find(!_.exists)
+    }
+
+    val outputFileWriter = new PrintWriter(new File(RpcServer.inputDirList(0) + "/output/received_from_slaveId" + from + randomFileName(Path("")).get.toString()))
 
     for (line <- lines) {
       outputFileWriter.println(line)
