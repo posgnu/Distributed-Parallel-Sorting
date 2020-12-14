@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit
 import Slave.{FileManager, RpcServer}
 import io.grpc.{ManagedChannel, ManagedChannelBuilder, StatusRuntimeException}
 import msg.msg.GreeterGrpc.GreeterBlockingStub
+import msg.msg.GreeterGrpc.GreeterStub
 import msg.msg.{Empty, FileChunk, GreeterGrpc, Pingreq, Samplesreq}
 import org.apache.logging.log4j.scala.Logging
 
@@ -13,13 +14,15 @@ object RpcClient extends Logging {
   def apply(host: String, port: Int): RpcClient = {
     val channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build
     val blockingStub = GreeterGrpc.blockingStub(channel)
-    new RpcClient(channel, blockingStub)
+    val stub = GreeterGrpc.stub(channel)
+    new RpcClient(channel, blockingStub, stub)
   }
 }
 
 class RpcClient private(
                                 private val channel: ManagedChannel,
-                                private val blockingStub: GreeterBlockingStub
+                                private val blockingStub: GreeterBlockingStub,
+                                private val stub: GreeterStub
                               ) extends Logging {
 
   def shutdown(): Unit = {
@@ -53,7 +56,7 @@ class RpcClient private(
 
   def sendFinshSort() = {
     try {
-      val response = blockingStub.finishSortRpc(Empty())
+      val response = stub.finishSortRpc(Empty())
     }
     catch {
       case e: StatusRuntimeException =>
@@ -73,7 +76,7 @@ class RpcClient private(
 
   def sendFinishSendFile() = {
     try {
-      val response = blockingStub.finishSendFile(Empty())
+      val response = stub.finishSendFile(Empty())
     }
     catch {
       case e: StatusRuntimeException =>
