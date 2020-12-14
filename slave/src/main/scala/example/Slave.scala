@@ -6,6 +6,7 @@ import client.RpcClient
 import io.grpc.{Server, ServerBuilder}
 import msg.msg.{Empty, GreeterGrpc, MetainfoReq, Pingreq, Samplesreq, FileChunk}
 import org.apache.logging.log4j.scala.Logging
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -60,6 +61,7 @@ object RpcServer {
     client = RpcClient(options('master).asInstanceOf[String], 6602)
     if (options.nonEmpty) {
       inputDirList = options('in).asInstanceOf[List[String]]
+      assert(options('out).asInstanceOf[String] == inputDirList(0)+"/output")
       outputDir = options('out).asInstanceOf[String]
     }
 
@@ -157,6 +159,7 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
 
       if (count == RpcServer.slaveList.size - 1) {
         logger.info("Finish to receive file from peers")
+        FileManager.DomergeSort()
       }
 
       Future.successful(Empty())

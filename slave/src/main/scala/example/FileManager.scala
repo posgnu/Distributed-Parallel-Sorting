@@ -9,20 +9,51 @@ import scala.reflect.io.Path
 import scala.util.Random
 
 object FileManager {
-  def writeReceivedFile(from: String, lines: List[String]) = {
-    def randomFileName(dir: Path, prefix: String = "", suffix: String = "", maxTries: Int = 10, nameSize: Int = 5): Option[Path] = {
-      val alphabet = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ ("_")
+  def writeToFile(data: Seq[String]) = {
+    val filename = RpcServer.outputDir + "/" + randomFileName(Path(""))
+    val outputFileWriter = new PrintWriter(new File(filename))
+    for (line <- data) {
+      outputFileWriter.println(line)
+    }
+  }
 
-      //0.- Expensive calculation!
-      def generateName = (1 to nameSize).map(_ => alphabet(Random.nextInt(alphabet.size))).mkString
+  def sortAndWrite(data: Seq[String]) = writeToFile(data.sortWith((f, s) => f.split(" ")(0) > s.split(" ")(0)))
 
-      //1.- Iterator
-      val paths = for(_ <- (1 to maxTries).iterator) yield dir/(prefix + generateName + suffix)
+  val mergeSort : Iterable[Iterator[String]] => Iterator[String] =
+    (fileIterators) => {
 
-      //2.- Return the first non existent file (path)
-      paths.find(!_.exists)
+      val nonEmptyFiles = fileIterators filter (_.hasNext)
+
+      nonEmptyFiles
+        .map(_.next)
+        .toList
+        .sortWith((f, s) => f.split(" ")(0) > s.split(" ")(0))
+        .toIterator ++ mergeSort(nonEmptyFiles)
     }
 
+  def DomergeSort() = {
+    val filenames = getListOfFiles(RpcServer.outputDir).map(_.getName)
+    // sort individual file
+    for (name <- filenames) {
+      val source = Source.fromFile(name)
+      source.getLines().grouped(100).foreach(sortAndWrite)
+      new File(name).delete()
+    }
+
+    var iterList = List[Iterator[String]]()
+    for (name <- filenames) {
+      val source = Source.fromFile(name)
+      iterList = iterList :+ source.getLines()
+    }
+
+    val filename = RpcServer.outputDir + "/" + "result"
+    val outputFileWriter = new PrintWriter(new File(filename))
+
+    mergeSort(iterList) foreach (i => outputFileWriter.println(i))
+  }
+
+
+  def writeReceivedFile(from: String, lines: List[String]) = {
     val outputFileWriter = new PrintWriter(new File(RpcServer.inputDirList(0) + "/output/received_from_slaveId" + from + randomFileName(Path("")).get.toString()))
 
     for (line <- lines) {
@@ -100,5 +131,18 @@ object FileManager {
     } else {
       List[File]()
     }
+  }
+
+  def randomFileName(dir: Path, prefix: String = "", suffix: String = "", maxTries: Int = 10, nameSize: Int = 5): Option[Path] = {
+    val alphabet = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ ("_")
+
+    //0.- Expensive calculation!
+    def generateName = (1 to nameSize).map(_ => alphabet(Random.nextInt(alphabet.size))).mkString
+
+    //1.- Iterator
+    val paths = for(_ <- (1 to maxTries).iterator) yield dir/(prefix + generateName + suffix)
+
+    //2.- Return the first non existent file (path)
+    paths.find(!_.exists)
   }
 }
