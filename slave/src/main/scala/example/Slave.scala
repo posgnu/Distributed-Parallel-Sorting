@@ -136,6 +136,8 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
 
     override def startShuffle(req: Empty) = {
       logger.info("Get startShuffle message!")
+      Thread.sleep(2000)
+      logger.info("Wait enough until last slave get his id!")
       FileManager.sendOutputToPeers()
       Future.successful(Empty())
     }
