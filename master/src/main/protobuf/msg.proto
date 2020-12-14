@@ -12,6 +12,8 @@ service Greeter {
   rpc metainfoRpc (MetainfoReq) returns (Empty) {}
 
    rpc FinishSortRpc (Empty) returns (Empty) {}
+
+   rpc StartShuffle (Empty) returns (Empty) {}
 }
 
 message Pingreq {

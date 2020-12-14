@@ -52,4 +52,16 @@ class RpcClient private(
       }
     }
   }
+
+  def sendStartShuffle(): Unit = {
+    try {
+      blockingStub.startShuffle(Empty())
+    }
+    catch {
+      case e: StatusRuntimeException => {
+        logger.info("RPC failed: startsample")
+        throw new IllegalStateException()
+      }
+    }
+  }
 }

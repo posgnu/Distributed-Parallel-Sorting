@@ -118,6 +118,7 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
       RpcServer.slaveList = req.slaves.toList
       RpcServer.pivots = req.pivots.toList
       logger.info("pivots: " + RpcServer.pivots.toString())
+      logger.info("peers: " + RpcServer.slaveList)
 
       // sorting individually
       FileManager.writeInputFileToOutput()
@@ -131,6 +132,12 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
 
     override def finishSortRpc(req: Empty) = {
       throw new NotImplementedError()
+    }
+
+    override def startShuffle(req: Empty) = {
+      logger.info("Get startShuffle message!")
+
+      Future.successful(Empty())
     }
   }
 }

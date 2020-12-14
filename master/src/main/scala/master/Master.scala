@@ -133,10 +133,15 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
         RpcServer.state = ShuffleCheck()
         logger.info("ShuffleCheck stage")
 
-
-
+        for (dest <- RpcServer.slaveRpcClientList) {
+          dest.sendStartShuffle()
+        }
       }
       Future.successful(Empty())
+    }
+
+    override def startShuffle(req: Empty) = {
+      throw new NotImplementedError()
     }
   }
 }
