@@ -32,7 +32,7 @@ object FileManager {
   }
 
   def readAll() = {
-    val fileList = getListOfFiles(RpcServer.inputDirList(0) + )
+    val fileList = getListOfFiles(RpcServer.inputDirList(0))
 
     for (filePath <- fileList) {
       val source = Source.fromFile(filePath)
@@ -45,7 +45,7 @@ object FileManager {
   }
 
   def writeInputFileToOutput() = {
-    val fileList = getListOfFiles(RpcServer.inputDirList(0) + )
+    val fileList = getListOfFiles(RpcServer.inputDirList(0))
     var outputFileWriter = List[PrintWriter]()
     for (i <- RpcServer.slaveList.indices) {
       outputFileWriter = outputFileWriter :+ new PrintWriter(new File(RpcServer.inputDirList(0) + "/output/" + i.toString))
