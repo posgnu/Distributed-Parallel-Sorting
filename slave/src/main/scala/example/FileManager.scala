@@ -8,7 +8,7 @@ import scala.io.Source
 
 object FileManager {
   def writeReceivedFile(from: String, lines: List[String]) = {
-    val outputFileWriter = new PrintWriter(new File("./testData/slave1/output/received_from_slaveId" + from))
+    val outputFileWriter = new PrintWriter(new File(RpcServer.inputDirList(0) + "/output/received_from_slaveId" + from))
 
     for (line <- lines) {
       outputFileWriter.println(line)
@@ -21,18 +21,18 @@ object FileManager {
     for (i <- RpcServer.slaveList.indices) {
       if (i != RpcServer.slaveId) {
         val rpcClientForPeer = RpcClient(RpcServer.slaveList(i), 6603)
-        val peerSource = Source.fromFile(new File("./testData/slave1/output/" + i.toString))
+        val peerSource = Source.fromFile(new File(RpcServer.inputDirList(0) + "/output/" + i.toString))
         peerSource.getLines().grouped(100).foreach(rpcClientForPeer.sendChunk)
 
         peerSource.close()
-        new File("./testData/slave1/output/" + i.toString).delete()
+        new File(RpcServer.inputDirList(0) + "/output/" + i.toString).delete()
         rpcClientForPeer.sendFinishSendFile()
       }
     }
   }
 
   def readAll() = {
-    val fileList = getListOfFiles("./testData/slave1")
+    val fileList = getListOfFiles(RpcServer.inputDirList(0) + )
 
     for (filePath <- fileList) {
       val source = Source.fromFile(filePath)
@@ -45,10 +45,10 @@ object FileManager {
   }
 
   def writeInputFileToOutput() = {
-    val fileList = getListOfFiles("./testData/slave1")
+    val fileList = getListOfFiles(RpcServer.inputDirList(0) + )
     var outputFileWriter = List[PrintWriter]()
     for (i <- RpcServer.slaveList.indices) {
-      outputFileWriter = outputFileWriter :+ new PrintWriter(new File("./testData/slave1/output/" + i.toString))
+      outputFileWriter = outputFileWriter :+ new PrintWriter(new File(RpcServer.inputDirList(0) + "/output/" + i.toString))
     }
 
     for (filePath <- fileList) {
@@ -70,7 +70,7 @@ object FileManager {
   }
 
   def readSamples() = {
-    val source = Source.fromFile(new File("./testData/slave1/input"))
+    val source = Source.fromFile(new File(RpcServer.inputDirList(0) + "/input"))
     val lines = source.getLines().take(10)
 
     val result = lines.map(x => x.split(" ")(0)).toList
