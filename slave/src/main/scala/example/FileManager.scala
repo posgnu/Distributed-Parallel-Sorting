@@ -10,7 +10,7 @@ import scala.util.Random
 
 object FileManager {
   def writeToFile(data: Seq[String]) = {
-    val filename = RpcServer.outputDir + "/" + randomFileName(Path("")).get.toString()
+    val filename = RpcServer.outputDir + "/result/" + randomFileName(Path("")).get.toString()
     val outputFileWriter = new PrintWriter(new File(filename))
     for (line <- data) {
       outputFileWriter.println(line)
@@ -33,22 +33,22 @@ object FileManager {
     }
 
   def DomergeSort() = {
-    var filenames = getListOfFiles(RpcServer.outputDir).map(_.getName)
+    var filenames = getListOfFiles(RpcServer.outputDir + "/received/").map(_.getName)
     println("filename1 " + filenames.toString())
     // sort individual file
     for (name <- filenames) {
-      val source = Source.fromFile(RpcServer.outputDir + "/" + name)
+      val source = Source.fromFile(RpcServer.outputDir + "/received/" + name)
       source.getLines().grouped(100).foreach(sortAndWrite)
       source.close()
       new File(name).delete()
     }
 
-    filenames = getListOfFiles(RpcServer.outputDir).map(_.getName)
+    filenames = getListOfFiles(RpcServer.outputDir + "/result/").map(_.getName)
     println("filename2 " + filenames.toString())
     var iterList = List[Iterator[String]]()
     var sourceList = List[Source]()
     for (name <- filenames) {
-      val source = Source.fromFile(RpcServer.outputDir + "/" + name)
+      val source = Source.fromFile(RpcServer.outputDir + "/result/" + name)
       sourceList = sourceList :+ source
       iterList = iterList :+ source.getLines()
     }
@@ -66,7 +66,17 @@ object FileManager {
 
 
   def writeReceivedFile(from: String, lines: List[String]) = {
-    val outputFileWriter = new PrintWriter(new File(RpcServer.inputDirList(0) + "/output/received_from_slaveId" + from + randomFileName(Path("")).get.toString()))
+    val outputFileWriter = new PrintWriter(new File(RpcServer.inputDirList(0) + "/output/received/received_from_slaveId" + from + randomFileName(Path("")).get.toString()))
+
+    for (line <- lines) {
+      outputFileWriter.println(line)
+    }
+
+    outputFileWriter.close()
+  }
+
+  def writeReceivedFileAux(lines: Seq[String]) = {
+    val outputFileWriter = new PrintWriter(new File(RpcServer.inputDirList(0) + "/output/received/received_from_slaveId" + RpcServer.slaveId.toString + randomFileName(Path("")).get.toString()))
 
     for (line <- lines) {
       outputFileWriter.println(line)
@@ -85,6 +95,11 @@ object FileManager {
         peerSource.close()
         new File(RpcServer.inputDirList(0) + "/output/" + i.toString).delete()
         rpcClientForPeer.sendFinishSendFile()
+      } else  {
+        val source = Source.fromFile(new File(RpcServer.inputDirList(0) + "/output/" + i.toString))
+        source.getLines().grouped(100).foreach(writeReceivedFileAux)
+        source.close()
+        new File(RpcServer.inputDirList(0) + "/output/" + i.toString).delete()
       }
     }
   }
