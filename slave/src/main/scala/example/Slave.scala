@@ -4,10 +4,10 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import client.RpcClient
 import io.grpc.{Server, ServerBuilder}
-import msg.msg.{Empty, GreeterGrpc, MetainfoReq, Pingreq, Samplesreq, FileChunk}
+import msg.msg.{Empty, FileChunk, GreeterGrpc, MetainfoReq, Pingreq, Samplesreq}
 import org.apache.logging.log4j.scala.Logging
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 abstract class State
@@ -154,10 +154,16 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
       val count = RpcServer.fileTransferFinishCount.addAndGet(1)
 
       if (count == RpcServer.slaveList.size - 1) {
-        logger.info("Finish to receive file from peers")
-        FileManager.DomergeSort()
-        logger.info("Send success message")
-        RpcServer.client.sendSuccess()
+        RpcServer.pool.execute(
+          new Runnable {
+            def run: Unit = {
+              logger.info("Finish to receive file from peers")
+              FileManager.DomergeSort()
+              logger.info("Send success message")
+              RpcServer.client.sendSuccess()
+            }
+          }
+        )
       }
 
 
