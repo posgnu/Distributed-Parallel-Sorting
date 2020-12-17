@@ -9,6 +9,9 @@ import msg.msg.{Empty, GreeterGrpc, Pingreq, Pingres, MetainfoReq, Samplesreq}
 
 import scala.concurrent.{ExecutionContext, Future}
 
+import java.util.concurrent.Executors
+
+
 abstract class State
 case class Init() extends State
 case class Sample() extends State
@@ -19,6 +22,7 @@ case class Success() extends State
 object RpcServer {
   var state: State = Init()
   var numberOfSlave = 0
+  val pool = java.util.concurrent.Executors.newFixedThreadPool(5)
   private var connectionCount = new AtomicInteger(0)
   private var metainfoCount = new AtomicInteger(0)
   private var sortedCount = new AtomicInteger(0)
@@ -93,7 +97,12 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
 
         // var samplesList = List[String]()
         for (dest <- RpcServer.slaveRpcClientList) {
-          dest.sendStartSample()
+          RpcServer.pool.execute(
+            new Runnable {
+              def run: Unit =
+                dest.sendStartSample()
+            }
+          )
         }
       }
       Future.successful(Pingres(slaveId))
@@ -112,7 +121,13 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
           pivots = pivots :+ sortedSamples(i*10-1)
         }
         for (dest <- RpcServer.slaveRpcClientList) {
-          dest.sendMetainfo(pivots)
+          RpcServer.pool.execute(
+            new Runnable {
+              def run: Unit = {
+                dest.sendMetainfo(pivots)
+              }
+            }
+          )
         }
       }
       Future.successful(Empty())

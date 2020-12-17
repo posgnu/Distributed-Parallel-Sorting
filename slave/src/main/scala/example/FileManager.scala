@@ -24,7 +24,7 @@ object FileManager {
     (fileIterators) => {
 
       val nonEmptyFiles = fileIterators filter (_.hasNext)
-
+      println(nonEmptyFiles.size)
       nonEmptyFiles
         .map(_.next)
         .toList
@@ -53,7 +53,7 @@ object FileManager {
       iterList = iterList :+ source.getLines()
     }
 
-    val filename = RpcServer.outputDir + "/" + "result"
+    val filename = RpcServer.outputDir + "/" + "output"
     val outputFileWriter = new PrintWriter(new File(filename))
 
     mergeSort(iterList) foreach (i => outputFileWriter.println(i))
@@ -119,6 +119,7 @@ object FileManager {
 
         var location = RpcServer.pivots.takeWhile(_ < key).size
         outputFileWriter(location).println(line)
+        // each file should be sorted
       }
       source.close()
     }

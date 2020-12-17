@@ -122,11 +122,6 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
       logger.info("pivots: " + RpcServer.pivots.toString())
       logger.info("peers: " + RpcServer.slaveList)
 
-      if (RpcServer.slaveId == -1) {
-        RpcServer.slaveId = RpcServer.slaveList.size - 1
-        logger.info("If you are the last slave, then you need to set id manually. your id is " + (RpcServer.slaveList.size - 1).toString)
-      }
-
       // sorting individually
       FileManager.writeInputFileToOutput()
       logger.info("Finish individual sort")
