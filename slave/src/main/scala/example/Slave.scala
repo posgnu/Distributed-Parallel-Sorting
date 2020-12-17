@@ -31,7 +31,7 @@ object RpcServer {
   var inputDirList: List[String] = List[String]()
   var outputDir = ""
 
-  private var client: RpcClient = null
+  var client: RpcClient = null
   private val port = 6603
 
   def main(args: Array[String]): Unit = {
@@ -156,9 +156,17 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
       if (count == RpcServer.slaveList.size - 1) {
         logger.info("Finish to receive file from peers")
         FileManager.DomergeSort()
+        logger.info("Send success message")
+        RpcServer.client.sendSuccess()
       }
 
+
+
       Future.successful(Empty())
+    }
+
+    override def success(req: Empty) = {
+      throw new NotImplementedError()
     }
   }
 }

@@ -14,6 +14,8 @@ service Greeter {
    rpc FinishSortRpc (Empty) returns (Empty) {}
 
    rpc StartShuffle (Empty) returns (Empty) {}
+
+   rpc success (Empty) returns (Empty) {}
 }
 
 message Pingreq {

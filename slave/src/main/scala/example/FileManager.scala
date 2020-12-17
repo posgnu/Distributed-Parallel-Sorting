@@ -107,9 +107,14 @@ object FileManager extends Logging {
       }
     }
     logger.info("Finish to send files to peers")
+
+    // When only 1 slave exists
     val count = RpcServer.fileTransferFinishCount.get()
     if (count == (RpcServer.slaveList.size - 1)) {
-      DomergeSort()
+      logger.info("Finish to receive file from peers")
+      FileManager.DomergeSort()
+      logger.info("Send success message")
+      RpcServer.client.sendSuccess()
     }
   }
 

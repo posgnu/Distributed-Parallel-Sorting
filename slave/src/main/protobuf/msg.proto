@@ -18,6 +18,8 @@ service Greeter {
   rpc SendFile (FileChunk) returns (Empty) {}
 
   rpc FinishSendFile (Empty) returns (Empty) {}
+
+  rpc success (Empty) returns (Empty) {}
 }
 
 message Pingreq {

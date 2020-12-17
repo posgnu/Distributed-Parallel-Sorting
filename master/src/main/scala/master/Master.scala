@@ -165,6 +165,17 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
     override def startShuffle(req: Empty) = {
       throw new NotImplementedError()
     }
+
+    override def success(req: Empty) = {
+      val count = RpcServer.successCount.addAndGet(1)
+      logger.info(count.toString + " of slaves finished their sorting")
+      if (count == RpcServer.numberOfSlave) {
+        logger.info("-------------------------------------------------------DONE-------------------------------------------------------")
+      }
+
+      stop()
+      Future.successful(Empty())
+    }
   }
 }
 

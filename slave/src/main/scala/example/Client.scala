@@ -83,4 +83,14 @@ class RpcClient private(
         logger.info("RPC failed: FinishSendFile")
     }
   }
+
+  def sendSuccess() = {
+    try {
+      val response = blockingStub.success(Empty())
+    }
+    catch {
+      case e: StatusRuntimeException =>
+        logger.info("RPC failed: FinishSendFile")
+    }
+  }
 }
