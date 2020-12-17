@@ -22,7 +22,7 @@ case class Success() extends State
 object RpcServer {
   var state: State = Init()
   var numberOfSlave = 0
-  val pool = java.util.concurrent.Executors.newFixedThreadPool(5)
+  val pool = java.util.concurrent.Executors.newFixedThreadPool(100)
   private var connectionCount = new AtomicInteger(0)
   private var metainfoCount = new AtomicInteger(0)
   private var sortedCount = new AtomicInteger(0)
@@ -150,7 +150,13 @@ class RpcServer(executionContext: ExecutionContext) extends Logging { self =>
         logger.info("ShuffleCheck stage")
 
         for (dest <- RpcServer.slaveRpcClientList) {
-          dest.sendStartShuffle()
+          RpcServer.pool.execute(
+            new Runnable {
+              def run: Unit = {
+                dest.sendStartShuffle()
+              }
+            }
+          )
         }
       }
       Future.successful(Empty())

@@ -20,7 +20,8 @@ case class Fail() extends State
 
 object RpcServer {
   var state: State = Init()
-  private var fileTransferFinishCount = new AtomicInteger(0)
+  var fileTransferFinishCount = new AtomicInteger(0)
+  val pool = java.util.concurrent.Executors.newFixedThreadPool(100)
   private var metainfoMessageSent = false
   private var finishSortMessageSent = false
   private var sortedComplete = false

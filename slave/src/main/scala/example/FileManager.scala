@@ -3,12 +3,13 @@ package Slave
 import java.io.{File, PrintWriter}
 
 import client.RpcClient
+import org.apache.logging.log4j.scala.Logging
 
 import scala.io.Source
 import scala.reflect.io.Path
 import scala.util.Random
 
-object FileManager {
+object FileManager extends Logging {
   def writeToFile(data: Seq[String]) = {
     val filename = RpcServer.outputDir + "/result/" + randomFileName(Path("")).get.toString()
     val outputFileWriter = new PrintWriter(new File(filename))
@@ -20,35 +21,30 @@ object FileManager {
 
   def sortAndWrite(data: Seq[String]) = writeToFile(data.sortWith((f, s) => f.split(" ")(0) > s.split(" ")(0)))
 
-  val mergeSort : Iterable[Iterator[String]] => Iterator[String] =
-    (fileIterators) => {
-
+  def mergeStep(fileIterators: Iterable[Iterator[String]]): Iterator[String] ={
       val nonEmptyFiles = fileIterators filter (_.hasNext)
-      println(nonEmptyFiles.size)
+
+      if (nonEmptyFiles.isEmpty) {
+        return Iterator()
+      }
+
       nonEmptyFiles
         .map(_.next)
         .toList
         .sortWith((f, s) => f.split(" ")(0) > s.split(" ")(0))
-        .toIterator ++ mergeSort(nonEmptyFiles)
+        .toIterator ++ mergeStep(nonEmptyFiles)
+
+      //nonEmptyFiles.toList.sortWith((f, s) => f.buffered.head.split(" ")(0) > s.buffered.head.split(" ")(0))
     }
 
   def DomergeSort() = {
+    logger.info("Start merge sort!")
     var filenames = getListOfFiles(RpcServer.outputDir + "/received/").map(_.getName)
-    println("filename1 " + filenames.toString())
-    // sort individual file
-    for (name <- filenames) {
-      val source = Source.fromFile(RpcServer.outputDir + "/received/" + name)
-      source.getLines().grouped(100).foreach(sortAndWrite)
-      source.close()
-      new File(name).delete()
-    }
 
-    filenames = getListOfFiles(RpcServer.outputDir + "/result/").map(_.getName)
-    println("filename2 " + filenames.toString())
     var iterList = List[Iterator[String]]()
     var sourceList = List[Source]()
     for (name <- filenames) {
-      val source = Source.fromFile(RpcServer.outputDir + "/result/" + name)
+      val source = Source.fromFile(RpcServer.outputDir + "/received/" + name)
       sourceList = sourceList :+ source
       iterList = iterList :+ source.getLines()
     }
@@ -56,19 +52,21 @@ object FileManager {
     val filename = RpcServer.outputDir + "/" + "output"
     val outputFileWriter = new PrintWriter(new File(filename))
 
-    mergeSort(iterList) foreach (i => outputFileWriter.println(i))
+    mergeStep(iterList) foreach (i => outputFileWriter.println(i))
+
     for (s <- sourceList) {
       s.close()
     }
     outputFileWriter.close()
-    println("1111")
+    // Delete recieved files
+    logger.info("Finish Merge")
   }
 
 
   def writeReceivedFile(from: String, lines: List[String]) = {
     val outputFileWriter = new PrintWriter(new File(RpcServer.inputDirList(0) + "/output/received/received_from_slaveId" + from + randomFileName(Path("")).get.toString()))
 
-    for (line <- lines) {
+    for (line <- lines.sortWith((f, s) => f.split(" ")(0) > s.split(" ")(0))) {
       outputFileWriter.println(line)
     }
 
@@ -76,9 +74,9 @@ object FileManager {
   }
 
   def writeReceivedFileAux(lines: Seq[String]) = {
-    val outputFileWriter = new PrintWriter(new File(RpcServer.inputDirList(0) + "/output/received/received_from_slaveId" + RpcServer.slaveId.toString + randomFileName(Path("")).get.toString()))
+    val outputFileWriter = new PrintWriter(new File(RpcServer.inputDirList(0) + "/output/received/received_from_slaveId-" + RpcServer.slaveId.toString + "-" + randomFileName(Path("")).get.toString()))
 
-    for (line <- lines) {
+    for (line <- lines.sortWith((f, s) => f.split(" ")(0) > s.split(" ")(0))) {
       outputFileWriter.println(line)
     }
 
@@ -88,19 +86,30 @@ object FileManager {
   def sendOutputToPeers() = {
     for (i <- RpcServer.slaveList.indices) {
       if (i != RpcServer.slaveId) {
-        val rpcClientForPeer = RpcClient(RpcServer.slaveList(i), 6603)
-        val peerSource = Source.fromFile(new File(RpcServer.inputDirList(0) + "/output/" + i.toString))
-        peerSource.getLines().grouped(100).foreach(rpcClientForPeer.sendChunk)
+        RpcServer.pool.execute(
+          new Runnable {
+            def run {
+              val rpcClientForPeer = RpcClient(RpcServer.slaveList(i), 6603)
+              val peerSource = Source.fromFile(new File(RpcServer.inputDirList(0) + "/output/" + i.toString))
+              peerSource.getLines().grouped(100).foreach(rpcClientForPeer.sendChunk)
 
-        peerSource.close()
-        new File(RpcServer.inputDirList(0) + "/output/" + i.toString).delete()
-        rpcClientForPeer.sendFinishSendFile()
+              peerSource.close()
+              new File(RpcServer.inputDirList(0) + "/output/" + i.toString).delete()
+              rpcClientForPeer.sendFinishSendFile()
+            }
+          }
+        )
       } else  {
         val source = Source.fromFile(new File(RpcServer.inputDirList(0) + "/output/" + i.toString))
         source.getLines().grouped(100).foreach(writeReceivedFileAux)
         source.close()
         new File(RpcServer.inputDirList(0) + "/output/" + i.toString).delete()
       }
+    }
+    logger.info("Finish to send files to peers")
+    val count = RpcServer.fileTransferFinishCount.get()
+    if (count == (RpcServer.slaveList.size - 1)) {
+      DomergeSort()
     }
   }
 
