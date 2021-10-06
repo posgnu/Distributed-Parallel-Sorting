@@ -50,7 +50,7 @@ __Slave__
 
 * ~~Fail~~ (Not implemented)
 
-The protocol also needs a minimum set of variable which make some side-effects that are tried to be avoided in this project
+The protocol also needs a minimum set of variables which makes some side-effects that are tried to be avoided in this project
 
 | **name** | **Location** | **Definition** | **Critical reason (atomic operations are needed**) |
 | - | - | - | - |
