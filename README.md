@@ -84,7 +84,7 @@ ShuffleCheck -> Success
 
 SuccessCount == n
 
-__Slave__
+__For Slave__
 
 Init -> Sample
 
