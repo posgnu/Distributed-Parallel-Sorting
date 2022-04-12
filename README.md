@@ -1,7 +1,6 @@
 
 
-# cs434-project
-> This project is a part of Advanced Programming (CSED434) at POSTECH
+# Distributed Parallel Sorting
 
 The objective of this project is implementing __Distributed/Parallel sorting key/value records stored on multiple disks on multiple machines__ using Scala. Basically we assume that mixed key/value data are stored on multiple disks on multiple machine. Therefore, we need a protocol to handle those multiple machine to effectively participate in the sorting process.
 
